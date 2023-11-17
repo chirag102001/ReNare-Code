@@ -1,8 +1,12 @@
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 
+WORKDIR = Path(__file__).parent
+
 # Step 1: Import the CSV file containing velocity data
-velocity_df = pd.read_csv('data_sensordata.csv',low_memory=False)
+velocity_df = pd.read_csv(WORKDIR / 'data_sensordata.csv',low_memory=False)
 
 # Step 2: Extract the required columns for linear and angular velocities
 linvel_columns = ['robot_link_1_linvel.x', 'robot_link_1_linvel.y', 'robot_link_1_linvel.z']
