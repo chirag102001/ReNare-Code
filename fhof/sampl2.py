@@ -49,7 +49,8 @@ def calculate_kinetic_energy(row):
 velocity_df['kinetic_energy'] = velocity_df.apply(calculate_kinetic_energy, axis=1)
 
 # Step 6: Calculate the total kinetic energy by summing all row values
-total_kinetic_energy = velocity_df['kinetic_energy'].sum()
+absolute_power = velocity_df["kinetic_energy"].diff(1).abs()
+total_kinetic_energy = absolute_power.sum() * velocity_df["time"].mean()
 
 # Step 7: You can now access the total kinetic energy value
 print("Total Kinetic Energy:", total_kinetic_energy)
