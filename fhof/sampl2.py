@@ -8,9 +8,14 @@ WORKDIR = Path(__file__).parent
 # Step 1: Import the CSV file containing velocity data
 velocity_df = pd.read_csv(WORKDIR / 'data_sensordata.csv',low_memory=False)
 
+inertial_df = pd.read_csv(WORKDIR / "parameters_inertial.csv", index_col="body_name", header=0)
+link_ids = inertial_df.index.to_list()
+
+link_id = link_ids[1]  # should be robot_link_1
+
 # Step 2: Extract the required columns for linear and angular velocities
-linvel_columns = ['robot_link_1_linvel.x', 'robot_link_1_linvel.y', 'robot_link_1_linvel.z']
-angvel_columns = ['robot_link_1_angvel.x', 'robot_link_1_angvel.y', 'robot_link_1_angvel.z']
+linvel_columns = [f'{link_id}_linvel.{axis}' for axis in "xyz"]
+angvel_columns = [f'{link_id}_angvel.{axis}' for axis in "xyz"]
 
 linvel_df = velocity_df[linvel_columns]
 angvel_df = velocity_df[angvel_columns]
@@ -26,10 +31,8 @@ angvel_df = velocity_df[angvel_columns]
 # link1_mass = link1_inertia_df['mass'].values[0]
 # link1_inertial = np.array(link1_inertia_df[['inertia_xx', 'inertia_yy', 'inertia_zz']])
 
-link1_mass = 7.778
-link1_inertial = np.array([[0.0314743, 0, 0],
-                           [0, 0.0314743, 0],
-                           [0, 0, 0.0218756]])
+link1_mass = inertial_df.loc[link_id]["mass"]
+link1_inertial = np.diag(inertial_df.loc[link_id].loc[[f"inertia.{axis}" for axis in ("xx", "yy", "zz")]])
 
 def calculate_kinetic_energy(row):
     linvel_values = np.array(row[linvel_columns])
