@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import plotly.express as px
+from scipy.ndimage import gaussian_filter1d
 
 # Define the working directory for the specific data
-WORKDIR = Path(r'C:\Users\Chirag\Desktop\fhof\load-layers\load-layers_horizontal_close_vel-0.25_rep-0\processed')
+WORKDIR = Path(r'C:\Users\Chirag\Desktop\fhof\load-layers\load-layers_horizontal_close_vel-0.25_rep-1\processed')
 
 # Step 1: Import the CSV file containing velocity data
 velocity_df = pd.read_csv(WORKDIR / 'sensordata_processed.csv', low_memory=False)
@@ -32,7 +33,7 @@ for step in steps_of_interest:
     # Loop through the first six links
     for i in range(1, 7):
         # Extract the required columns for linear and angular velocities for the current link
-        link_id = link_ids[i]  # Adjust the index to start from 0
+        link_id = link_ids[i - 1]  # Adjust the index to start from 0
         linvel_columns = [f'robot_{link_id}_linvel.{axis}' for axis in "xyz"]
         angvel_columns = [f'robot_{link_id}_angvel.{axis}' for axis in "xyz"]
 
@@ -72,8 +73,12 @@ for step in steps_of_interest:
     # Print the total kinetic energy for the current step
     print(f"Total Kinetic Energy ({step}):", total_kinetic_energy)
 
-    # Plot the total kinetic energy over time for this step
-    fig = px.line(step_rows, x='time', y='total_kinetic_energy', title=f'Total Kinetic Energy over Time for {step}', labels={'total_kinetic_energy': 'Total Kinetic Energy', 'time': 'Time'})
+    # Smooth the total kinetic energy data using a Gaussian filter with a moderate sigma value
+    sigma_value = 3  # Moderate sigma value for smoother curve without over-smoothing
+    step_rows['smoothed_kinetic_energy'] = gaussian_filter1d(step_rows['total_kinetic_energy'], sigma=sigma_value)
+
+    # Plot the smoothed total kinetic energy over time for this step
+    fig = px.line(step_rows, x='time', y='smoothed_kinetic_energy', title=f'Smoothed Total Kinetic Energy over Time for {step}', labels={'smoothed_kinetic_energy': 'Smoothed Total Kinetic Energy', 'time': 'Time'})
     fig.show()
 
 # Optionally, print the total kinetic energy values
